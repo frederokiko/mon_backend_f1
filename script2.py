@@ -5,7 +5,7 @@ import os
 
 def get_sqlalchemy_engine():
     engine = create_engine(
-        "mssql+pyodbc://technofuturtic\f.renaux@GOS-VDI307\TFTIC/Course_oki?driver=ODBC+Driver+17+for+SQL+Server&trusted_connection=yes"
+        "mssql+pyodbc://DESKTOP-8EFA22F\frede@DESKTOP-8EFA22F\SQLEXPRESS/Course_oki?driver=ODBC+Driver+17+for+SQL+Server&trusted_connection=yes"
     )
     return engine
 

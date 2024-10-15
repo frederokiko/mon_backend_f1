@@ -4,7 +4,8 @@ from sqlalchemy.orm import sessionmaker
 
 def get_sqlalchemy_engine():
     return create_engine(
-        "mssql+pyodbc://technofuturtic\f.renaux@GOS-VDI307\TFTIC/Course_oki?driver=ODBC+Driver+17+for+SQL+Server&trusted_connection=yes"
+        "mssql+pyodbc://DESKTOP-8EFA22F\frede@DESKTOP-8EFA22F\SQLEXPRESS/Course_oki?driver=ODBC+Driver+17+for+SQL+Server&trusted_connection=yes"
+        # "mssql+pyodbc://technofuturtic\f.renaux@GOS-VDI307\TFTIC/Course_oki?driver=ODBC+Driver+17+for+SQL+Server&trusted_connection=yes"
     )
 
 engine = get_sqlalchemy_engine()
