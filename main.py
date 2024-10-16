@@ -11,7 +11,7 @@ from typing import List
 import jwt
 from datetime import UTC, datetime, timedelta
 from passlib.context import CryptContext
-from schema2 import DriverRequest
+from schema2 import DriverRequest,PosRequest
 # Configuration de la sécurité (copié-collé)
 SECRET_KEY = "votre_clé_secrète1"  # Remplacez par une clé secrète robuste
 ALGORITHM = "HS256"
@@ -321,6 +321,26 @@ async def get_info_gp(current_user: User = Depends(get_current_user), db: Sessio
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# Route pour la requête SQL recherche par annee et rank 
+@app.post("/result_year")
+async def get_result_year(result1: PosRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    try:
+        query = text("""
+                     SELECT r.date,c.country,r.name,d.forename,d.surname,res.position
+                     FROM races r 
+                     JOIN  results res ON r.raceId= res.raceId
+                     JOIN drivers d ON  d.driverId=res.driverId
+                     JOIN circuits c ON c.circuitId=r.circuitId
+                     WHERE r.year= :year AND res.position= :rank
+                     ORDER BY r.date
+        """)
+        
+        result = db.execute(query, {"year": result1.year, "rank": result1.rank})
+        data = [{"date": row[0], "country": row[1], "name": row[2], "forename": row[3], "surname": row[4], "rank": row[5]} for row in result]
+        
+        return {"data": data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn
