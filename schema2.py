@@ -7,3 +7,6 @@ class DriverRequest(BaseModel):
 class PosRequest(BaseModel):
     year:int
     rank:int
+
+class PosConstru(BaseModel):
+    constru: str

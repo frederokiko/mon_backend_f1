@@ -11,7 +11,7 @@ from typing import List
 import jwt
 from datetime import UTC, datetime, timedelta
 from passlib.context import CryptContext
-from schema2 import DriverRequest,PosRequest
+from schema2 import DriverRequest,PosRequest,PosConstru
 # Configuration de la sécurité (copié-collé)
 SECRET_KEY = "votre_clé_secrète1"  # Remplacez par une clé secrète robuste
 ALGORITHM = "HS256"
@@ -341,6 +341,53 @@ async def get_result_year(result1: PosRequest, current_user: User = Depends(get_
         return {"data": data}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# Route pour la requête SQL spécifique afficher la liste de tous les pilotes
+@app.get("/tout_constructeur")
+async def get_tout_constructeur(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    try:
+        query = text("""
+            SELECT name
+            FROM constructors
+            ORDER BY name
+        """)
+        
+        result = db.execute(query)
+        
+        data = [{"name": row[0]} for row in result]
+        
+        return {"data": data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Route pour la requête SQL recherche par annee et rank 
+@app.post("/result_pilote_constructeur")
+async def get_result_pilote_constructeur(result : PosConstru, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    try:
+        query = text("""
+                    SELECT DISTINCT c.name AS 'ecurie' ,
+				d.forename,
+				d.surname,
+				MAX(ra.year+1)-MIN(ra.year) AS'annee',
+				MIN(ra.year) AS'debut',
+				MAX(ra.year) AS'fin',
+				COUNT(res.points ) AS 'nbr_gp'
+FROM drivers d  
+	JOIN results res on d.driverId=res.driverId
+	JOIN constructors c ON c.constructorId=res.constructorId 
+	JOIN races ra ON res.raceId =ra.raceId
+WHERE c.name = :name
+GROUP BY c.name, d.forename, d.surname
+ORDER BY annee DESC
+        """)
+        
+        result = db.execute(query, {"name": result.constru})
+        data = [{"ecurie": row[0], "forname": row[1], "surname": row[2], "annee": row[3], "debut": row[4], "fin": row[5],"nbr_gp":row[6]} for row in result]
+        
+        return {"data": data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 if __name__ == "__main__":
     import uvicorn
