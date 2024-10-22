@@ -192,7 +192,7 @@ async def get_pole_position_annee(current_user: User = Depends(get_current_user)
 async def get_constructor_victory(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     try:
         query = text("""
-            SELECT top(10) co.name, COUNT(*) as wins  
+            SELECT co.name, COUNT(*) as wins  
             FROM results r
             JOIN constructors co ON r.constructorId = co.constructorId
             WHERE r.position = '1'
